@@ -1,17 +1,25 @@
  
 import { useState } from 'react';
 
-type Note = { title: string, starred: boolean, id: string ,deleteNote:(id:string)=>void };
+type Note = { title: string, starred: boolean, id: string};
 
-function NoteCard(props: Note) {
-  const [starred, setStarred] = useState(false);
-  return <p>{props.title}
-    < button onClick={() => setStarred(!starred)} >
+type NoteCardProps = {
+  note: Note,
+  onDelete: (id: string) => void,
+  onStar: (id: string) => void
+}
+
+function NoteCard(props: NoteCardProps) {
+  
+  return <p>{props.note.title}
+    < button onClick={() => {
+      props.onStar(props.note.id);
+    }} >
     
-    {starred ? '  ★' : '  ☆'}
+    {props.note.starred ? '  ★' : '  ☆'}
     </button> 
     <button onClick={() => {
-       props.deleteNote(props.id);
+       props.onDelete(props.note.id);
     }}>Delete</button>
   </p >
 }
@@ -27,8 +35,9 @@ function App() {
   function addNote() {
     if (text.trim() === '') return;
     const id = Date.now().toString();
-    setNotes([{ title: text.trim(), starred: false, id, deleteNote: (id) => deleteNote(id) }, ...notes]);
+    setNotes([{ title: text.trim(), starred: false, id }, ...notes]);
     setText('');
+    
   }
 
   function deleteNote(id: string) {
@@ -36,12 +45,22 @@ function App() {
     setNotes(newNotes);
   }
 
+
+  function starNote(id: string){
+    setNotes(notes.map((note) => {
+      if(note.id === id){
+        return {...note, starred: !note.starred};
+      }
+      return note;
+    }));
+  }
+
   return (
     <div>
       <h1>My Notes</h1>
       <input type = 'text' value={text} placeholder="Add a new note" onChange= {(e)=>{setText(e.target.value)}} ></input>
       <button onClick={addNote}>Add Note</button>
-      {notes.map((note,index) => <NoteCard key={index} title={note.title} id={note.id} starred={note.starred} deleteNote={deleteNote} />)}
+      {notes.map((note) => <NoteCard key={note.id} note={note} onDelete={deleteNote} onStar={starNote}  />)}
     </div>);
 }
       
