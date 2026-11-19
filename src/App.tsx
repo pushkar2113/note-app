@@ -1,5 +1,5 @@
  
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type Note = { title: string, starred: boolean, id: string};
 
@@ -29,8 +29,19 @@ function App() {
 
   
   
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<Note[]>(() => {
+    const saved = localStorage.getItem('notes');
+    if (saved) {
+      return JSON.parse(saved);
+    } else {
+      return [];
+    }
+  });
   const [text, setText] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('notes', JSON.stringify(notes));
+  }, [notes]);
 
   function addNote() {
     if (text.trim() === '') return;
